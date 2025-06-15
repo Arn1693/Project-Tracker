@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Tracker with Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f4f4f9;
+    }
+    h2 {
+      color: #333;
+    }
+    form, table {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .edit-btn {
+      background-color: #007bff;
+      margin-top: 5px;
+      padding: 5px 10px;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .edit-btn:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    #summaryBox {
+      margin-bottom: 20px;
+      padding: 16px;
+      background-color: #eef4ff;
+      border-left: 4px solid #007bff;
+      border-radius: 6px;
+    }
+    #summaryBox p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Project Tracker</h2>
+
+  <div id="summaryBox">
+    <strong>Project Summary:</strong>
+    <p>Total Projects: <span id="totalProjects">0</span></p>
+    <p>Status - Not Started: <span id="notStarted">0</span>,
+       In Progress: <span id="inProgress">0</span>,
+       Completed: <span id="completed">0</span>,
+       On Hold: <span id="onHold">0</span></p>
+    <p>Average Progress: <span id="avgProgress">0</span>%</p>
+  </div>
+
+  <form id="projectForm">
+    <label>Project Name:
+      <input type="text" id="projectName" required>
+    </label>
+    <label>Assigned To:
+      <input type="text" id="assignedTo" required>
+    </label>
+    <label>Priority:
+      <select id="priority">
+        <option value="High">High</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="Low">Low</option>
+      </select>
+    </label>
+    <label>Start Date:
+      <input type="date" id="startDate" required>
+    </label>
+    <label>Due Date:
+      <input type="date" id="dueDate" required>
+    </label>
+    <label>Status:
+      <select id="status">
+        <option value="Not Started">Not Started</option>
+        <option value="In Progress" selected>In Progress</option>
+        <option value="Completed">Completed</option>
+        <option value="On Hold">On Hold</option>
+      </select>
+    </label>
+    <label>Progress (%):
+      <input type="number" id="progress" min="0" max="100" value="0">
+    </label>
+
+    <button type="submit">Save Project</button>
+  </form>
+
+  <table id="projectTable">
+    <thead>
+      <tr>
+        <th>Project Name</th>
+        <th>Assigned To</th>
+        <th>Priority</th>
+        <th>Start Date</th>
+        <th>Due Date</th>
+        <th>Status</th>
+        <th>Progress</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Project rows go here -->
+    </tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('projectForm');
+    const tableBody = document.querySelector('#projectTable tbody');
+
+    let editRow = null;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const name = document.getElementById('projectName').value;
+      const assigned = document.getElementById('assignedTo').value;
+      const priority = document.getElementById('priority').value;
+      const start = document.getElementById('startDate').value;
+      const due = document.getElementById('dueDate').value;
+      const status = document.getElementById('status').value;
+      const progress = document.getElementById('progress').value;
+
+      if (editRow) {
+        // Update existing row
+        editRow.cells[0].textContent = name;
+        editRow.cells[1].textContent = assigned;
+        editRow.cells[2].textContent = priority;
+        editRow.cells[3].textContent = start;
+        editRow.cells[4].textContent = due;
+        editRow.cells[5].textContent = status;
+        editRow.cells[6].textContent = progress + "%";
+        editRow = null;
+      } else {
+        // Create new row
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${name}</td>
+          <td>${assigned}</td>
+          <td>${priority}</td>
+          <td>${start}</td>
+          <td>${due}</td>
+          <td>${status}</td>
+          <td>${progress}%</td>
+          <td><button class="edit-btn">Edit</button></td>
+        `;
+        tableBody.appendChild(row);
+      }
+
+      form.reset();
+      updateSummary();
+    });
+
+    tableBody.addEventListener('click', function (e) {
+      if (e.target.classList.contains('edit-btn')) {
+        editRow = e.target.closest('tr');
+        const cells = editRow.children;
+
+        document.getElementById('projectName').value = cells[0].textContent;
+        document.getElementById('assignedTo').value = cells[1].textContent;
+        document.getElementById('priority').value = cells[2].textContent;
+        document.getElementById('startDate').value = cells[3].textContent;
+        document.getElementById('dueDate').value = cells[4].textContent;
+        document.getElementById('status').value = cells[5].textContent;
+        document.getElementById('progress').value = parseInt(cells[6].textContent);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    function updateSummary() {
+      const rows = document.querySelectorAll('#projectTable tbody tr');
+      let total = rows.length;
+      let notStarted = 0, inProgress = 0, completed = 0, onHold = 0;
+      let totalProgress = 0;
+
+      rows.forEach(row => {
+        const status = row.cells[5].textContent.trim();
+        const progress = parseInt(row.cells[6].textContent);
+
+        if (status === "Not Started") notStarted++;
+        else if (status === "In Progress") inProgress++;
+        else if (status === "Completed") completed++;
+        else if (status === "On Hold") onHold++;
+
+        totalProgress += isNaN(progress) ? 0 : progress;
+      });
+
+      document.getElementById('totalProjects').textContent = total;
+      document.getElementById('notStarted').textContent = notStarted;
+      document.getElementById('inProgress').textContent = inProgress;
+      document.getElementById('completed').textContent = completed;
+      document.getElementById('onHold').textContent = onHold;
+      document.getElementById('avgProgress').textContent = total === 0 ? 0 : Math.round(totalProgress / total);
+    }
+  </script>
+
+</body>
+</html>
